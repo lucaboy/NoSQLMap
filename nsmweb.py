@@ -13,6 +13,12 @@ import datetime
 import time
 import random
 
+class CustomHTTPErrorProcessor(urllib2.HTTPErrorProcessor):
+    http_response = https_response = lambda self, request, response: response
+
+opener = urllib2.build_opener(CustomHTTPErrorProcessor)
+urllib2.install_opener(opener)
+
 # Fix for dealing with self-signed certificates.  This is wrong and highly discouraged, to be revisited in stable branch
 
 if version_info >= (2, 7, 9):
@@ -90,23 +96,19 @@ def getApps(webPort,victim,uri,https,verb,requestHeaders, args = None):
     try:
         req = urllib2.Request(appURL, None, requestHeaders)
         appRespCode = urllib2.urlopen(req).getcode()
-        if appRespCode == 200:
-            normLength = int(len(getResponseBodyHandlingErrors(req)))
-            timeReq = urllib2.urlopen(req)
-            start = time.time()
-            page = timeReq.read()
-            end = time.time()
-            timeReq.close()
-            timeBase = round((end - start), 3)
+        normLength = int(len(getResponseBodyHandlingErrors(req)))
+        timeReq = urllib2.urlopen(req)
+        start = time.time()
+        page = timeReq.read()
+        end = time.time()
+        timeReq.close()
+        timeBase = round((end - start), 3)
 
-            if verb == "ON":
-                print "App is up! Got response length of " + str(normLength) + " and response time of " + str(timeBase) + " seconds.  Starting injection test.\n"
-            else:
-                print "App is up!"
-            appUp = True
-
+        if verb == "ON":
+            print "App is up! Got response length of " + str(normLength) + " and response time of " + str(timeBase) + " seconds.  Starting injection test.\n"
         else:
-            print "Got " + str(appRespCode) + "from the app, check your options."
+            print "App is up!"
+        appUp = True
     except NoSQLMapException,e:
         print e
         print "Looks like the server didn't respond.  Check your options."
@@ -427,24 +429,21 @@ def postApps(victim,webPort,uri,https,verb,postData,requestHeaders, args = None)
         req = urllib2.Request(appURL,body, requestHeaders)
         appRespCode = urllib2.urlopen(req).getcode()
 
-        if appRespCode == 200:
 
-            normLength = int(len(getResponseBodyHandlingErrors(req)))
-            timeReq = urllib2.urlopen(req)
-            start = time.time()
-            page = timeReq.read()
-            end = time.time()
-            timeReq.close()
-            timeBase = round((end - start), 3)
+        normLength = int(len(getResponseBodyHandlingErrors(req)))
+        timeReq = urllib2.urlopen(req)
+        start = time.time()
+        page = timeReq.read()
+        end = time.time()
+        timeReq.close()
+        timeBase = round((end - start), 3)
 
-            if verb == "ON":
-                print "App is up! Got response length of " + str(normLength) + " and response time of " + str(timeBase) + " seconds.  Starting injection test.\n"
+        if verb == "ON":
+            print "App is up! Got response length of " + str(normLength) + " and response time of " + str(timeBase) + " seconds.  Starting injection test.\n"
 
-            else:
-                print "App is up!"
-            appUp = True
         else:
-            print "Got " + str(appRespCode) + "from the app, check your options."
+            print "App is up!"
+        appUp = True
 
     except NoSQLMapException,e:
         print e
